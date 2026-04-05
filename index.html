@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>File Compressor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%237c6dfa'/><stop offset='100%25' stop-color='%23b49dff'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><text y='.9em' font-size='65' text-anchor='middle' x='50' dominant-baseline='auto' dy='5'>🗜</text></svg>" />
+  <style>
+    /* ── WebP note ── */
+    .webp-note {
+      background: rgba(124,109,250,0.08);
+      border: 1px solid rgba(124,109,250,0.22);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: var(--text2);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .webp-note strong { color: var(--accent2); }
+
+    /* ── Convert button variant ── */
+    .convert-btn {
+      margin-top: 8px !important;
+      background: rgba(124,109,250,0.10) !important;
+      border: 1px solid rgba(124,109,250,0.28) !important;
+      color: var(--accent2) !important;
+    }
+    .convert-btn:hover {
+      background: rgba(124,109,250,0.18) !important;
+    }
+
+    /* ── Module table in modal ── */
+    .module-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin: 10px 0 4px;
+    }
+    .module-table th {
+      text-align: left;
+      padding: 5px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted, #888);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .module-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+    .module-table tr:last-child td { border-bottom: none; }
+    .module-name {
+      font-weight: 600;
+      color: #b49dff;
+      white-space: nowrap;
+    }
+
+    /* ── Privacy note in modal ── */
+    .modal-privacy {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(16,185,129,0.07);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="bg-orb bg-orb-3"></div>
+
+<!-- Main card -->
+<div class="card">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-icon">🗜</div>
+      <div class="logo-text">
+        <h1>File Compressor</h1>
+        <div class="tagline">Set a target size — get a compressed file. No uploads, no accounts.</div>
+      </div>
+    </div>
+    <button class="formats-btn" id="formatsBtn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Formats
+    </button>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="dropzone" id="dropzone">
+    <input type="file" id="fileInput" />
+    <span class="dropzone-icon">📂</span>
+    <div class="dropzone-title">Drop your file here</div>
+    <div class="dropzone-sub">or <span>browse files</span></div>
+    <div class="file-info" id="fileInfo"></div>
+  </div>
+
+  <!-- Tip box -->
+  <div class="tip-box">
+    <div class="tip-row">
+      <span class="tip-icon">💡</span>
+      <span><strong>Tip:</strong> Set the target slightly lower than needed — e.g. <strong>995 KB</strong> instead of 1 MB — to stay safely within your limit.</span>
+    </div>
+    <div class="tip-row warn">
+      <span class="tip-icon">⚠️</span>
+      <span>Compressing too aggressively can reduce image quality. Use the lowest target you truly need.</span>
+    </div>
+  </div>
+
+  <!-- Target size controls -->
+  <p class="controls-label">Target size</p>
+  <div class="row">
+    <div class="field">
+      <label class="field-label" for="sizeInput">Amount</label>
+      <input type="number" id="sizeInput" value="10" min="0.001" step="any" placeholder="e.g. 10" />
+    </div>
+    <div class="field-sm">
+      <label class="field-label" for="unitSelect">Unit</label>
+      <select id="unitSelect">
+        <option value="KB">KB</option>
+        <option value="MB" selected>MB</option>
+        <option value="GB">GB</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Action button -->
+  <button class="btn" id="compressBtn" disabled>Compress File</button>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-header">
+      <span class="progress-label" id="progressLabel">Processing…</span>
+      <span class="progress-pct" id="progressPct"></span>
+    </div>
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result"></div>
+
+  <!-- Footer -->
+  <p class="footer">Made with <span>♥</span> by Kaushik Karmakar</p>
+
+</div>
+
+<!-- Supported Formats Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+    <h2>Supported Formats</h2>
+
+    <!-- Privacy note -->
+    <div class="modal-privacy">
+      🔒 <span>Your files are processed securely on the server and <strong>never stored</strong>. Each file is compressed in memory and immediately discarded.</span>
+    </div>
+
+    <!-- How image compression works -->
+    <div class="modal-section">
+      <div class="modal-section-title">⚡ How image compression works</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px;">
+        Images (JPEG, PNG, RAW, HEIC, BMP, TIFF…) are compressed using <strong>WebP</strong> by default — WebP delivers 25–35% better quality per byte than JPEG at the same file size. After downloading, you'll get an option to <strong>convert back to your original format</strong> (JPEG, PNG, etc.) at the same compressed size.
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">
+        PNG files stay as PNG using palette quantisation (pngquant-style). GIF and AVIF also stay native. The compressor runs a binary search across quality levels and resolution scales to find the best possible result within your target.
+      </p>
+    </div>
+
+    <!-- Compression engines -->
+    <div class="modal-section">
+      <div class="modal-section-title">⚙️ Compression engines</div>
+      <table class="module-table">
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Used for</th>
+            <th>Why it's the best</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="module-name">sharp</td>
+            <td>All images</td>
+            <td>libvips-powered — fastest high-quality image processor; Lanczos3 resampling prevents aliasing</td>
+          </tr>
+          <tr>
+            <td class="module-name">mozjpeg</td>
+            <td>JPEG output</td>
+            <td>Mozilla's JPEG encoder — trellis quantisation + optimised Huffman = 10–20% smaller than standard libjpeg</td>
+          </tr>
+          <tr>
+            <td class="module-name">pngquant</td>
+            <td>PNG</td>
+            <td>Palette quantisation + Floyd–Steinberg dithering — 40–70% size reduction with minimal visual loss</td>
+          </tr>
+          <tr>
+            <td class="module-name">WebP encoder</td>
+            <td>JPEG-family images</td>
+            <td>Google's WebP — 25–35% better quality/byte than JPEG; used as primary output for maximum quality at small sizes</td>
+          </tr>
+          <tr>
+            <td class="module-name">pdf-lib</td>
+            <td>PDF</td>
+            <td>Re-saves with object streams + cross-reference compression; strips all metadata</td>
+          </tr>
+          <tr>
+            <td class="module-name">archiver</td>
+            <td>Documents</td>
+            <td>Zip/deflate level 9 — best for DOCX/XLSX/PPTX (already zip-based) and plain text files</td>
+          </tr>
+          <tr>
+            <td class="module-name">zlib</td>
+            <td>Fallback</td>
+            <td>Triple-pass: deflate-raw → gzip → deflate; picks whichever produces the smallest output</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Format sections -->
+    <div class="modal-section">
+      <div class="modal-section-title">🖼 Images — sharp · mozjpeg · pngquant · WebP</div>
+      <div class="tag-grid">
+        <span class="tag">JPG</span><span class="tag">JPEG</span><span class="tag">JFIF</span>
+        <span class="tag">PNG</span><span class="tag">WEBP</span><span class="tag">AVIF</span>
+        <span class="tag">GIF</span><span class="tag">BMP</span><span class="tag">ICO</span>
+        <span class="tag">TIFF</span><span class="tag">TIF</span><span class="tag">HEIC</span>
+        <span class="tag">HEIF</span><span class="tag">PSD</span><span class="tag">SVG</span>
+        <span class="tag">RAW</span><span class="tag">CR2</span><span class="tag">NEF</span>
+        <span class="tag">ARW</span><span class="tag">DNG</span>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">📄 PDF — pdf-lib</div>
+      <div class="tag-grid">
+        <span class="tag">PDF</span>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">📁 Documents — archiver · zlib</div>
+      <div class="tag-grid">
+        <span class="tag">DOCX</span><span class="tag">DOC</span>
+        <span class="tag">XLSX</span><span class="tag">XLS</span>
+        <span class="tag">PPTX</span><span class="tag">PPT</span>
+        <span class="tag">ODT</span><span class="tag">ODS</span><span class="tag">ODP</span>
+        <span class="tag">EPUB</span><span class="tag">TXT</span><span class="tag">RTF</span>
+        <span class="tag">CSV</span><span class="tag">MD</span><span class="tag">HTML</span>
+        <span class="tag">XML</span><span class="tag">JSON</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="index.js"></script>
+</body>
+</html>

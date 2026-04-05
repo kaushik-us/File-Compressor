@@ -1,0 +1,20 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+  command = "echo build done"
+
+[dev]
+  targetPort = 3999
+  framework = "#static"
+
+[functions]
+  node_bundler = "nft"
+  included_files = ["node_modules/sharp/**", "node_modules/@img/**"]
+
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

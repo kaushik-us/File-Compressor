@@ -1,0 +1,16 @@
+{
+  "name": "file-compressor",
+  "version": "1.0.0",
+  "description": "Best-in-class file compressor — sharp, mozjpeg, pngquant, pdf-lib, archiver",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "busboy": "^1.6.0",
+    "cors": "^2.8.6",
+    "pdf-lib": "^1.17.1",
+    "sharp": "^0.34.5"
+  }
+}
